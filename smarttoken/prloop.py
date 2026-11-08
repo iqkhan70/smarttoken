@@ -163,12 +163,13 @@ def wait_for_copilot_review(
 
 
 def collect_actionable(client: GitHubClient, owner: str, repo: str, number: int) -> List[Finding]:
+    reviews = client.list_reviews(owner, repo, number)
     comments = client.list_comments(owner, repo, number)
     try:
         threads = client.review_threads(owner, repo, number)
     except GitHubError:
         threads = []
-    return actionable(copilot_findings(comments, threads))
+    return actionable(copilot_findings(comments, threads, reviews))
 
 
 def run_copilot_fix(prompt: str, cwd: str) -> Tuple[bool, str]:

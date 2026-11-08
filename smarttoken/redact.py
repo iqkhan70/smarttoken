@@ -25,6 +25,19 @@ def redact(text: str) -> str:
     return out
 
 
+def redact_preserving_lines(text: str) -> str:
+    """Redact secrets while keeping source line numbers stable for snippet ranges."""
+    out = PEM_BLOCK.sub(
+        lambda match: re.sub(r"[^\r\n]+", "[REDACTED]", match.group(0)),
+        text,
+    )
+    out = ASSIGNED_SECRET.sub(lambda m: _redact_assignment(m.group(0)), out)
+    out = OPENAI_KEY.sub("[REDACTED]", out)
+    out = AWS_KEY.sub("[REDACTED]", out)
+    out = BEARER.sub("Bearer [REDACTED]", out)
+    return out
+
+
 def _redact_assignment(chunk: str) -> str:
     if "=" in chunk:
         left, _right = chunk.split("=", 1)

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import sqlite3
+from contextlib import contextmanager
+from typing import Iterator
+
 from mcp.server import MCPServer
 from mcp.types import ToolAnnotations
 
@@ -19,6 +23,19 @@ READ_ONLY = ToolAnnotations(
 )
 
 
+@contextmanager
+def _read_only_store(paths: AppPaths) -> Iterator[IndexStore]:
+    if not paths.db_file.is_file():
+        raise ValueError(f"SmartToken index not found at {paths.db_file}. Run `smarttoken index` first.")
+    try:
+        with IndexStore(paths.db_file, read_only=True) as store:
+            yield store
+    except sqlite3.Error as exc:
+        raise ValueError(
+            f"Cannot read the SmartToken index at {paths.db_file}. Run `smarttoken index` to initialize or migrate it."
+        ) from exc
+
+
 @mcp.tool(annotations=READ_ONLY)
 def search(query: str, repo: str | None = None, limit: int = 10) -> str:
     """Search SmartToken's local index and return ranked paths with redacted previews.
@@ -34,8 +51,8 @@ def search(query: str, repo: str | None = None, limit: int = 10) -> str:
         raise ValueError("limit must be between 1 and 100")
 
     paths = AppPaths(resolve_home())
-    with IndexStore(paths.db_file) as store:
-        if repo and store.get_repo(repo) is None:
+    with _read_only_store(paths) as store:
+        if repo is not None and store.get_repo(repo) is None:
             raise ValueError(f"Unknown repo '{repo}'. Run `smarttoken repos`.")
         hits = search_index(store, query, repo_name=repo, limit=limit)
 
@@ -64,8 +81,8 @@ def pack(task: str, repo: str | None = None, budget: int | None = None) -> str:
 
     paths = AppPaths(resolve_home())
     settings = load_settings(paths)
-    with IndexStore(paths.db_file) as store:
-        if repo and store.get_repo(repo) is None:
+    with _read_only_store(paths) as store:
+        if repo is not None and store.get_repo(repo) is None:
             raise ValueError(f"Unknown repo '{repo}'. Run `smarttoken repos`.")
         packet = build_packet(store, task, settings, repo_name=repo, budget=budget)
     if packet.used_tokens > packet.budget:

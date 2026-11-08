@@ -10,7 +10,7 @@ from smarttoken.index_store import IndexStore
 from smarttoken.models import SearchHit, Snippet
 from smarttoken.prompts import restated_task, suggested_ask
 from smarttoken.rank import content_terms, task_kind, term_in
-from smarttoken.redact import redact
+from smarttoken.redact import redact, redact_preserving_lines
 from smarttoken.search import search_index
 from smarttoken.symbols import SymbolHit, extract_symbols, symbols_matching
 from smarttoken.tokens import count_tokens
@@ -210,17 +210,20 @@ def _snippets_for_hits(
     for hit in hits:
         if hit.role == "generated":
             continue
-        content = store.get_file_text(hit.file_id)
-        symbols = extract_symbols(content, hit.lang, hit.rel_path)
-        windows = _hit_windows(content, query, context_lines, symbols)
+        original_content = store.get_file_text(hit.file_id)
+        content = redact_preserving_lines(original_content)
+        symbols = extract_symbols(original_content, hit.lang, hit.rel_path)
+        windows = _hit_windows(original_content, query, context_lines, symbols)
+        safe_lines = content.splitlines()
         for start, end, text, why in windows:
+            safe_text = "\n".join(safe_lines[start - 1 : end])
             snippets.append(
                 Snippet(
                     repo_name=hit.repo_name,
                     rel_path=hit.rel_path,
                     start_line=start,
                     end_line=end,
-                    text=redact(text),
+                    text=redact(safe_text),
                     why=why,
                     score=hit.score,
                     role=hit.role,

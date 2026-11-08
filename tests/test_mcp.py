@@ -1,3 +1,4 @@
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -15,12 +16,16 @@ def test_mcp_search_returns_ranked_paths_and_redacts_previews(
 ) -> None:
     secrets_file = sample_root / "src/payments/secrets_demo.py"
     long_secret = "LONGSECRETDO_NOT_LEAK_" * 12
-    pem_body = "PEM_BODY_DO_NOT_LEAK_0123456789"
+    pem_body = "pemmaterial zebravalve"
+    pem_block = [
+        "# padding before the PEM block"
+    ] * 20 + ["-----BEGIN RSA PRIVATE KEY-----", pem_body] + [
+        "privatekeypaddingmaterial"
+    ] * 40 + ["-----END RSA PRIVATE KEY-----"]
     secrets_file.write_text(
-        "-----BEGIN RSA PRIVATE KEY-----\n"
-        f"{pem_body}\n"
-        "-----END RSA PRIVATE KEY-----\n\n"
-        + secrets_file.read_text()
+        secrets_file.read_text()
+        + "\n"
+        + "\n".join(pem_block)
         + f'\nLONG_API_KEY = "{long_secret}"\n',
         encoding="utf-8",
     )
@@ -30,6 +35,9 @@ def test_mcp_search_returns_ranked_paths_and_redacts_previews(
     with IndexStore(paths.db_file) as store:
         repo = add_paths(store, [sample_root])[0]
         store.index_repo(repo, Settings())
+    with IndexStore(paths.db_file, read_only=True) as store:
+        with pytest.raises(sqlite3.OperationalError):
+            store.conn.execute("CREATE TABLE should_not_be_written (id INTEGER)")
 
     result = search("API_KEY", limit=5)
 
@@ -48,6 +56,13 @@ def test_mcp_search_returns_ranked_paths_and_redacts_previews(
     assert "src/payments/secrets_demo.py" in pem_result
     assert "[REDACTED]" in pem_result
     assert pem_body not in pem_result
+
+    pem_pack = pack(pem_body, repo=repo.name, budget=1200)
+    assert "src/payments/secrets_demo.py" in pem_pack
+    assert "[REDACTED]" in pem_pack
+    snippets = pem_pack.split("## Snippets", 1)[1].split("## Symbols / callers", 1)[0]
+    assert pem_body not in snippets
+    assert "privatekeypaddingmaterial" not in snippets
 
 
 def test_mcp_pack_is_bounded_and_rejects_bad_inputs(
@@ -71,3 +86,19 @@ def test_mcp_pack_is_bounded_and_rejects_bad_inputs(
         pack("long task " * 300, budget=200)
     with pytest.raises(ValueError, match="must not be empty"):
         search("   ")
+    with pytest.raises(ValueError, match="Unknown repo"):
+        search("webhook", repo="")
+    with pytest.raises(ValueError, match="Unknown repo"):
+        pack("webhook", repo="")
+
+
+def test_mcp_requires_existing_index_without_creating_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "missing-home"
+    monkeypatch.setenv("SMARTTOKEN_HOME", str(home))
+
+    with pytest.raises(ValueError, match="Run `smarttoken index` first"):
+        search("anything")
+
+    assert not (home / "index.db").exists()

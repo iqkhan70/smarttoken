@@ -18,7 +18,7 @@ from smarttoken.rank import (
     task_kind,
     term_in,
 )
-from smarttoken.redact import redact
+from smarttoken.redact import redact_preserving_lines
 
 ALL_TERMS_BONUS = 12.0
 # A file containing a phrase the task quotes verbatim is almost always the one to change.
@@ -186,12 +186,13 @@ def _path_fallback(
 
 def _preview_line(content: str, query: str) -> str:
     terms = content_terms(query)
-    redacted_content = redact(content)
-    for line in redacted_content.splitlines():
+    original_lines = content.splitlines()
+    safe_lines = redact_preserving_lines(content).splitlines()
+    for index, line in enumerate(original_lines):
         lower = line.lower()
         if any(term in lower for term in terms):
-            return line.strip()[:160]
-    for line in redacted_content.splitlines():
+            return safe_lines[index].strip()[:160]
+    for line in safe_lines:
         if line.strip():
             return line.strip()[:160]
     return ""
