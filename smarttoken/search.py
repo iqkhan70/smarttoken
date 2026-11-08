@@ -186,13 +186,14 @@ def _path_fallback(
 
 def _preview_line(content: str, query: str) -> str:
     terms = content_terms(query)
-    for line in content.splitlines():
+    redacted_content = redact(content)
+    for line in redacted_content.splitlines():
         lower = line.lower()
         if any(term in lower for term in terms):
-            return redact(line.strip())[:160]
-    for line in content.splitlines():
+            return line.strip()[:160]
+    for line in redacted_content.splitlines():
         if line.strip():
-            return redact(line.strip())[:160]
+            return line.strip()[:160]
     return ""
 
 

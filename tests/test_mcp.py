@@ -15,8 +15,12 @@ def test_mcp_search_returns_ranked_paths_and_redacts_previews(
 ) -> None:
     secrets_file = sample_root / "src/payments/secrets_demo.py"
     long_secret = "LONGSECRETDO_NOT_LEAK_" * 12
+    pem_body = "PEM_BODY_DO_NOT_LEAK_0123456789"
     secrets_file.write_text(
-        secrets_file.read_text()
+        "-----BEGIN RSA PRIVATE KEY-----\n"
+        f"{pem_body}\n"
+        "-----END RSA PRIVATE KEY-----\n\n"
+        + secrets_file.read_text()
         + f'\nLONG_API_KEY = "{long_secret}"\n',
         encoding="utf-8",
     )
@@ -39,6 +43,11 @@ def test_mcp_search_returns_ranked_paths_and_redacts_previews(
     assert "[REDACTED]" in long_secret_result
     assert long_secret not in result
     assert long_secret not in long_secret_result
+
+    pem_result = search(pem_body, limit=5)
+    assert "src/payments/secrets_demo.py" in pem_result
+    assert "[REDACTED]" in pem_result
+    assert pem_body not in pem_result
 
 
 def test_mcp_pack_is_bounded_and_rejects_bad_inputs(
