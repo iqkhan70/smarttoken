@@ -68,6 +68,11 @@ def pack(task: str, repo: str | None = None, budget: int | None = None) -> str:
         if repo and store.get_repo(repo) is None:
             raise ValueError(f"Unknown repo '{repo}'. Run `smarttoken repos`.")
         packet = build_packet(store, task, settings, repo_name=repo, budget=budget)
+    if packet.used_tokens > packet.budget:
+        raise ValueError(
+            f"Pack requires {packet.used_tokens} tokens, exceeding the budget of {packet.budget}. "
+            "Use a shorter task or a larger budget."
+        )
     return packet.markdown
 
 
