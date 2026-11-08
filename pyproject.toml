@@ -17,9 +17,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
 ]
+mcp = [
+    "mcp>=2.0.0",
+]
 
 [project.scripts]
 smarttoken = "smarttoken.cli:run"
+smarttoken-mcp = "smarttoken.mcp_server:run"
 
 [build-system]
 requires = ["hatchling"]
