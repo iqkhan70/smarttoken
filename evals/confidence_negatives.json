@@ -1,0 +1,17 @@
+{
+  "name": "questions whose answer is not in the repo (check should say low)",
+  "tasks": [
+    {"id": "eats-kafka", "task": "where is the kafka consumer for order events", "repo": "Eats"},
+    {"id": "eats-graphql", "task": "how is the graphql schema stitched together", "repo": "Eats"},
+    {"id": "eats-terraform", "task": "where is the terraform for the lambda functions", "repo": "Eats"},
+    {"id": "eats-elastic", "task": "how does elasticsearch index restaurant menus", "repo": "Eats"},
+    {"id": "eats-saml", "task": "where is saml single sign-on configured", "repo": "Eats"},
+    {"id": "eats-grpc", "task": "how are the grpc service stubs generated", "repo": "Eats"},
+    {"id": "go-kafka", "task": "where is the kafka consumer for order events", "repo": "golangpoc"},
+    {"id": "go-redis", "task": "how does the redis cache get invalidated", "repo": "golangpoc"},
+    {"id": "go-pdf", "task": "where are pdf receipts generated for orders", "repo": "golangpoc"},
+    {"id": "go-saml", "task": "how is saml single sign-on configured", "repo": "golangpoc"},
+    {"id": "go-firebase", "task": "where are push notifications sent through firebase", "repo": "golangpoc"},
+    {"id": "go-graphql", "task": "how is the graphql resolver for menus built", "repo": "golangpoc"}
+  ]
+}

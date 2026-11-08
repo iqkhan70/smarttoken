@@ -1,0 +1,7 @@
+Scratch pad for ideas that are not yet in PLAN.md.
+
+Promote into PLAN.md only when we commit to build the idea.
+Leave Phase 6 items (embeddings, MCP, TUI) here until the core loop is daily-use.
+
+Pulled forward: measure/eval/report (was Phase 6 eval harness).
+

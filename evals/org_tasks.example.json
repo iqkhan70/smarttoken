@@ -1,0 +1,13 @@
+{
+  "name": "example org gold set",
+  "tasks": [
+    {
+      "id": "replace-with-a-real-question",
+      "task": "where is the invoice webhook signature checked?",
+      "repo": "your-registered-repo-name",
+      "must_include": ["path/to/the/file/a-human-would-open.py"],
+      "nice_include": ["path/to/related/test.py"],
+      "must_exclude": ["dist/bundle.js"]
+    }
+  ]
+}

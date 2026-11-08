@@ -1,0 +1,28 @@
+{
+  "name": "smarttoken fixture",
+  "tasks": [
+    {
+      "id": "webhook-signature",
+      "task": "where is the webhook signature checked?",
+      "must_include": ["src/payments/webhook.py"],
+      "must_exclude": ["dist/bundle.js", "src/unrelated/inventory.py"]
+    },
+    {
+      "id": "fix-webhook-retry",
+      "task": "fix retry on payment webhook",
+      "must_include": ["src/payments/webhook.py"],
+      "nice_include": ["tests/test_webhook.py"],
+      "must_exclude": ["dist/bundle.js", "src/unrelated/inventory.py"]
+    },
+    {
+      "id": "deploy-checkout",
+      "task": "how do we deploy checkout",
+      "must_include": ["docs/deploy.md"]
+    },
+    {
+      "id": "auth-request",
+      "task": "explain authenticate_request payments auth",
+      "must_include": ["src/payments/auth.py"]
+    }
+  ]
+}

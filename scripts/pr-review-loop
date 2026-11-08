@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Same as: smarttoken prloop
+# Prompts for repo name, GitHub credentials if needed, PR confirmation,
+# Copilot review, then commit confirmation until medium/high findings are gone.
+set -euo pipefail
+exec smarttoken prloop "$@"

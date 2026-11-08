@@ -1,0 +1,55 @@
+{
+  "name": "golangpoc gold set (Go, non-git folder)",
+  "tasks": [
+    {
+      "id": "jwt-issue",
+      "task": "where is the JWT access token issued",
+      "repo": "golangpoc",
+      "must_include": ["pkg/auth/jwt.go"]
+    },
+    {
+      "id": "password-verify",
+      "task": "how are ASP.NET password hashes verified at login",
+      "repo": "golangpoc",
+      "must_include": ["pkg/auth/aspnet_password.go"],
+      "nice_include": ["internal/identity/service.go"]
+    },
+    {
+      "id": "login-flow",
+      "task": "where does the identity service handle login",
+      "repo": "golangpoc",
+      "must_include": ["internal/identity/service.go"],
+      "nice_include": ["internal/identity/handler.go"]
+    },
+    {
+      "id": "cart-add-item",
+      "task": "add a quantity limit when adding an item to the cart",
+      "repo": "golangpoc",
+      "must_include": ["internal/order/service.go"]
+    },
+    {
+      "id": "place-order",
+      "task": "how is an order placed from the cart",
+      "repo": "golangpoc",
+      "must_include": ["internal/order/service.go"]
+    },
+    {
+      "id": "gateway-forward",
+      "task": "how does the gateway forward requests to backend services",
+      "repo": "golangpoc",
+      "must_include": ["internal/gateway/client.go"]
+    },
+    {
+      "id": "cors-middleware",
+      "task": "fix CORS headers on the API",
+      "repo": "golangpoc",
+      "must_include": ["pkg/middleware/middleware.go"]
+    },
+    {
+      "id": "mysql-connect",
+      "task": "where is the MySQL connection opened",
+      "repo": "golangpoc",
+      "must_include": ["pkg/database/mysql.go"]
+    }
+  ]
+}

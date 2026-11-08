@@ -1,0 +1,71 @@
+{
+  "name": "TraditionalEats gold set",
+  "tasks": [
+    {
+      "id": "stripe-payment-intent",
+      "task": "where is CreatePaymentIntentAsync implemented for Stripe",
+      "repo": "Eats",
+      "must_include": [
+        "src/services/TraditionalEats.PaymentService/Services/PaymentService.cs"
+      ],
+      "nice_include": [
+        "src/services/TraditionalEats.PaymentService/Controllers/PaymentController.cs"
+      ],
+      "must_exclude": ["node_modules", "bin/", "obj/"]
+    },
+    {
+      "id": "jwt-login",
+      "task": "where does IdentityService create the JWT token on login",
+      "repo": "Eats",
+      "must_include": [
+        "src/services/TraditionalEats.IdentityService/Services/AuthService.cs"
+      ],
+      "nice_include": [
+        "src/services/TraditionalEats.IdentityService/Controllers/AuthController.cs"
+      ]
+    },
+    {
+      "id": "order-ready-notify",
+      "task": "how are order ready push SMS and email notifications sent",
+      "repo": "Eats",
+      "must_include": [
+        "src/services/TraditionalEats.NotificationService/Services/OrderStatusEventHandler.cs"
+      ]
+    },
+    {
+      "id": "vendor-chat-hub",
+      "task": "where is the vendor chat SignalR hub",
+      "repo": "Eats",
+      "must_include": [
+        "src/services/TraditionalEats.ChatService/Hubs/VendorChatHub.cs"
+      ],
+      "nice_include": [
+        "src/services/TraditionalEats.ChatService/Services/ChatService.cs"
+      ]
+    },
+    {
+      "id": "mobile-cart",
+      "task": "how does the mobile app cart service add items",
+      "repo": "Eats",
+      "must_include": [
+        "src/apps/TraditionalEats.MobileApp/services/cart.ts"
+      ]
+    },
+    {
+      "id": "mobile-bff",
+      "task": "what does the Mobile BFF controller expose",
+      "repo": "Eats",
+      "must_include": [
+        "src/bff/TraditionalEats.Mobile.Bff/Controllers/MobileBffController.cs"
+      ]
+    },
+    {
+      "id": "request-ride",
+      "task": "where does the customer request a ride from a restaurant",
+      "repo": "Eats",
+      "must_include": [
+        "src/apps/TraditionalEats.MobileApp/app/restaurants/[restaurantId]/request-ride.tsx"
+      ]
+    }
+  ]
+}

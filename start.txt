@@ -1,0 +1,9 @@
+I joined a new organization
+Frequent needs to go thru different git repositories to understand the code
+Not only understand but be productive to do enhancement/fixes development in general
+It is just not smart prompts that I am looking for.
+The problem is my needs of scrouring thru code repositories is high becasue I am new
+Is there anything that I could build such that I don't exhaust my token usage quickly
+Something that scours my code locally using my app, creates more definitive things for paid ai to do and so on
+Something that makes usage of my paid AI smart
+My preferred language is python since it is very powerful for scouring searching etc. however I am open for suggestions
