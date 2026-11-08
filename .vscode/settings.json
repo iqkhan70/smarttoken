@@ -1,0 +1,5 @@
+{
+  "terminal.integrated.env.osx": {
+    "SMARTTOKEN_HOME": "${userHome}/.smarttoken/smarttoken"
+  }
+}
