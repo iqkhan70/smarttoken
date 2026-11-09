@@ -49,15 +49,19 @@ def utc_now() -> str:
 
 
 class IndexStore:
-    def __init__(self, db_path: Path) -> None:
-        db_path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, db_path: Path, read_only: bool = False) -> None:
         self.db_path = db_path
-        self.conn = sqlite3.connect(db_path)
+        if read_only:
+            self.conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+        else:
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
-        self.conn.execute("PRAGMA foreign_keys = ON")
-        self.conn.executescript(SCHEMA)
-        self._migrate()
-        self.conn.commit()
+        if not read_only:
+            self.conn.execute("PRAGMA foreign_keys = ON")
+            self.conn.executescript(SCHEMA)
+            self._migrate()
+            self.conn.commit()
 
     def _migrate(self) -> None:
         cols = {row[1] for row in self.conn.execute("PRAGMA table_info(repos)")}

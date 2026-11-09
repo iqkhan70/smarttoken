@@ -30,6 +30,10 @@ _SEVERITY_RE = re.compile(
     r"|(?:^\s*\*{0,2}(high|medium|low)\*{0,2}\s*[:\-])"
     r"|(?:(?:🔴|🟠|🟡|:red_circle:|:orange_circle:|:yellow_circle:)\s*\*{0,2}(high|medium|low))"
 )
+_OVERVIEW_COMMENT_RE = re.compile(r"discussion_r(?P<id>\d+)")
+_OVERVIEW_SEVERITY_RE = re.compile(
+    r"(?i)(?:alt=[\"'](?P<alt>high|medium|low) severity[\"']|\b(?P<plain>high|medium|low) severity\b)"
+)
 
 
 class GitHubError(RuntimeError):
@@ -176,8 +180,17 @@ class GitHubClient:
         )
 
     def list_reviews(self, owner: str, repo: str, number: int) -> List[Dict[str, Any]]:
-        data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/reviews")
-        return data if isinstance(data, list) else []
+        rows: List[Dict[str, Any]] = []
+        page = 1
+        while True:
+            data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100&page={page}")
+            if not isinstance(data, list):
+                break
+            rows.extend(data)
+            if len(data) < 100:
+                break
+            page += 1
+        return rows
 
     def list_comments(self, owner: str, repo: str, number: int) -> List[Dict[str, Any]]:
         data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/comments")
@@ -223,7 +236,19 @@ class GitHubClient:
 def copilot_findings(
     comments: List[Dict[str, Any]],
     threads: Optional[List[Dict[str, Any]]] = None,
+    reviews: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Finding]:
+    overview_severities: Dict[int, str] = {}
+    for review in reviews or []:
+        if not is_copilot_login((review.get("user") or {}).get("login")):
+            continue
+        for line in str(review.get("body") or "").splitlines():
+            comment_match = _OVERVIEW_COMMENT_RE.search(line)
+            severity_match = _OVERVIEW_SEVERITY_RE.search(line)
+            if comment_match and severity_match:
+                severity = severity_match.group("alt") or severity_match.group("plain")
+                overview_severities[int(comment_match.group("id"))] = severity.lower()
+
     resolved_ids = set()
     for thread in threads or []:
         if not thread.get("isResolved"):
@@ -240,13 +265,17 @@ def copilot_findings(
         if row.get("in_reply_to_id"):
             continue
         cid = int(row["id"])
+        body = str(row.get("body") or "").strip()
+        severity = parse_severity(body)
+        if severity == "unknown":
+            severity = overview_severities.get(cid, severity)
         findings.append(
             Finding(
                 comment_id=cid,
                 path=str(row.get("path") or ""),
                 line=row.get("line") or row.get("original_line"),
-                severity=parse_severity(str(row.get("body") or "")),
-                body=str(row.get("body") or "").strip(),
+                severity=severity,
+                body=body,
                 html_url=str(row.get("html_url") or ""),
                 resolved=cid in resolved_ids,
             )

@@ -152,7 +152,7 @@ Work in this order. Each phase should be usable before the next starts.
 ### Phase 6 — Only if the core loop is daily-use
 
 - [ ] Optional local embeddings (sentence-transformers) as a second retriever, never required.
-- [ ] MCP server so Cursor can call `search` / `pack` instead of paste.
+- [x] Read-only MCP server exposing local `search` / `pack` over stdio for Copilot CLI.
 - [ ] TUI. Incremental watch.
 - [x] Eval / measure harness (pulled forward so usefulness is a number, not a demo).
 

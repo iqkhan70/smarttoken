@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from smarttoken.prloop import RepoNotFound, commit_fixes, resolve_named_repo
+from smarttoken.github import actionable, copilot_findings
 
 
 def test_resolve_named_repo_requires_exact_remote_match(tmp_path, monkeypatch) -> None:
@@ -51,3 +52,34 @@ def test_commit_fixes_includes_new_files(tmp_path) -> None:
 
     assert ok, note
     assert "copilot-new.txt" in git("show", "--pretty=", "--name-only", "HEAD").splitlines()
+
+
+def test_copilot_review_overview_severities_apply_to_inline_comments() -> None:
+    reviews = [
+        {
+            "user": {"login": "copilot-pull-request-reviewer[bot]"},
+            "body": '\n- <img alt="High severity"> [Redact safely](https://github.com/o/r/pull/1#discussion_r123) · New\n'
+            '- <img alt="Medium severity"> [Bound packet](https://github.com/o/r/pull/1#discussion_r456) · New\n',
+        }
+    ]
+    comments = [
+        {
+            "id": 123,
+            "user": {"login": "Copilot"},
+            "path": "smarttoken/search.py",
+            "body": "This can leak a secret.",
+            "html_url": "https://github.com/o/r/pull/1#discussion_r123",
+        },
+        {
+            "id": 456,
+            "user": {"login": "Copilot"},
+            "path": "smarttoken/mcp_server.py",
+            "body": "This can exceed the budget.",
+            "html_url": "https://github.com/o/r/pull/1#discussion_r456",
+        },
+    ]
+
+    findings = copilot_findings(comments, reviews=reviews)
+
+    assert [item.severity for item in findings] == ["high", "medium"]
+    assert len(actionable(findings)) == 2
