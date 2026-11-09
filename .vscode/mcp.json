@@ -3,10 +3,7 @@
     "smarttoken": {
       "type": "stdio",
       "command": "${workspaceFolder}/.venv/bin/smarttoken-mcp",
-      "args": [],
-      "env": {
-        "SMARTTOKEN_HOME": "${userHome}/.smarttoken/smarttoken"
-      }
+      "args": []
     }
   }
 }

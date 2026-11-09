@@ -180,8 +180,17 @@ class GitHubClient:
         )
 
     def list_reviews(self, owner: str, repo: str, number: int) -> List[Dict[str, Any]]:
-        data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/reviews")
-        return data if isinstance(data, list) else []
+        rows: List[Dict[str, Any]] = []
+        page = 1
+        while True:
+            data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100&page={page}")
+            if not isinstance(data, list):
+                break
+            rows.extend(data)
+            if len(data) < 100:
+                break
+            page += 1
+        return rows
 
     def list_comments(self, owner: str, repo: str, number: int) -> List[Dict[str, Any]]:
         data = self.request("GET", f"/repos/{owner}/{repo}/pulls/{number}/comments")

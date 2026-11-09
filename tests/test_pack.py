@@ -88,3 +88,11 @@ def test_pointers_skip_weak_files_and_code() -> None:
     assert "secret source line" not in text
     assert "L10-30" in text
     assert "weak.py" not in text
+
+
+def test_redact_preserves_line_count_for_multiline_matches() -> None:
+    from smarttoken.redact import redact
+
+    text = 'api_key:\n  "supersecretvalue123"\nBearer\nplain\nafter'
+    assert redact(text).count("\n") == text.count("\n")
+    assert "supersecretvalue123" not in redact(text)
