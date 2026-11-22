@@ -13,3 +13,27 @@ My preferred language is python since it is very powerful for scouring searching
 SMARTTOKEN_HOME="$HOME/.smarttoken/smarttoken" smarttoken index
 
 
+gh api /copilot_internal/user --jq '
+  (["QUOTA", "TOTAL", "USED", "REMAINING", "USED_%", "LEFT_%"] | @tsv),
+  (.quota_snapshots | to_entries[] | 
+    [
+      .key,
+      .value.entitlement,
+      (.value.entitlement - .value.remaining),
+      .value.remaining,
+      (if .value.entitlement > 0 then ((((.value.entitlement - .value.remaining) / .value.entitlement * 10000) | round) / 100 | tostring + "%") else "0%" end),
+      ((.value.percent_remaining | tostring) + "%")
+    ] | @tsv)
+' | column -t -s $'\t'
+
+
+--Daily token & cost table:bash
+npx ccusage@latest daily
+
+
+--Monthly token & cost table:bash
+npx ccusage@latest monthly
+
+
+--Active 5-hour billing window table:bash
+npx ccusage@latest blocks
