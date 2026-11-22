@@ -11,3 +11,5 @@ My preferred language is python since it is very powerful for scouring searching
 
 
 SMARTTOKEN_HOME="$HOME/.smarttoken/smarttoken" smarttoken index
+
+
